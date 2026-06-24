@@ -7,7 +7,6 @@ from config import (
     STYLE_TODO,
     STYLE_STRUCTURED,
 )
-
 SYSTEM_PROMPT = """You are Mark-me-down, a specialized assistant designed to transform messy, unformatted, or raw notes into clean, well-formatted markdown.
 
 Core directives:

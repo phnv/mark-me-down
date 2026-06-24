@@ -1,7 +1,6 @@
 import streamlit as st
 import streamlit.components.v1 as components
 import json
-from streamlit_javascript import st_javascript
 
 def copy_to_clipboard(text: str, label: str = "📋 Copy Markdown"):
     """Renders a custom HTML/JS button to copy text directly to the user's browser clipboard.
@@ -50,17 +49,3 @@ def copy_to_clipboard(text: str, label: str = "📋 Copy Markdown"):
     """
     components.html(html_code, height=50)
 
-def read_from_clipboard() -> str:
-    """Attempts to read text from the browser's clipboard using streamlit-javascript.
-    
-    Returns the copied text if successful, or an empty string/None on block/failure.
-    """
-    try:
-        # Evaluates client-side JS and returns the result to streamlit.
-        # This will trigger browser permission request.
-        clipboard_text = st_javascript("navigator.clipboard.readText()")
-        if isinstance(clipboard_text, str) and clipboard_text != "null":
-            return clipboard_text
-    except Exception as e:
-        st.warning(f"Unable to read clipboard automatically: {e}")
-    return ""

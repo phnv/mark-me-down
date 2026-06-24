@@ -4,14 +4,13 @@
 
 1. User copies some text.
 2. User opens the application.
-3. The application attempts to read the clipboard.
-4. If clipboard access fails, the user pastes text manually.
-5. Raw text is displayed.
-6. User optionally selects a specific markdown template from the dropdown (loaded from Supabase).
-7. User optionally toggles "Include frontmatter" to generate YAML metadata.
-8. User previews the selected template's markdown structure in the preview block.
-9. User confirms the transformation by clicking "Clean Note".
-10. The note (with selected mode, style, and template instructions) is sent to the LLM.
+3. User pastes text manually.
+4. Raw text is displayed.
+5. User optionally selects a specific markdown template from the dropdown (loaded from Supabase).
+6. User optionally toggles "Include frontmatter" to generate YAML metadata.
+7. User previews the selected template's markdown structure in the preview block.
+8. User confirms the transformation by clicking "Clean Note".
+9. The note (with selected mode, style, and template instructions) is sent to the LLM.
 11. The application returns formatted markdown.
 12. User edits the markdown manually if desired.
 13. User previews the rendered markdown.

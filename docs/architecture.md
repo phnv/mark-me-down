@@ -43,10 +43,9 @@ Prompt behavior should remain independent from orchestration code.
 
 Input area:
 
-* attempt clipboard read
-* fallback to manual paste
+* manual paste
 
-Options:
+Options (Sidebar):
 
 Refactor mode:
 
@@ -65,7 +64,11 @@ Template Selection:
 
 * Dropdown menu populated from Supabase `templates` table
 * Frontmatter inclusion toggle (Yes/No)
+
+Main View:
+* Text input
 * Real-time template markdown preview using `streamlit_markdown` component
+* Clean Note button
 
 Output section:
 

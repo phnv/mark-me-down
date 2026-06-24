@@ -74,6 +74,8 @@ def render_home_page():
         st.session_state.user_edited_markdown = ""
     if "last_processed_raw" not in st.session_state:
         st.session_state.last_processed_raw = ""
+    if "raw_text_input" not in st.session_state:
+        st.session_state.raw_text_input = ""
 
     # Fetch templates from Supabase
     templates = []
@@ -94,65 +96,56 @@ def render_home_page():
         st.warning(f"Could not load templates: {e}")
 
     # 4. Input Section
-    st.subheader("1. Enter Your Messy Note")
-    
-    raw_text = st.text_area(
-        "Paste your unformatted notes or rough text below:",
-        height=200,
-        placeholder="e.g. metting w/ bob at 2pm. discussed roadmap. need to finish widgets by friday. bob will write tests.",
-        help="Paste your rough thoughts, transcripts, or unformatted text here."
-    )
-
-    # Disable button if key is missing or no text is entered
-    submit_disabled = not api_key or not raw_text.strip()
-    
-    # Template Selection UI (placed above the button)
-    st.subheader("2. Select Template & Options")
-    
-    template_options = [{"id": "none", "name": "No template"}] + templates
-    
-    # Use columns to place drop-down menu and preview block side by side
-    sel_col1, sel_col2 = st.columns([1, 1])
-    
-    with sel_col1:
-        selected_template_idx = st.selectbox(
-            "Select Template",
-            range(len(template_options)),
-            format_func=lambda i: template_options[i]["name"]
-        )
-        
-        include_fm = st.radio("Include frontmatter", options=["Yes", "No"], index=1, horizontal=True)
-        include_frontmatter = (include_fm == "Yes")
-        
-        selected_template = template_options[selected_template_idx]
-        if selected_template["id"] != "none":
-            st.markdown(f"**{selected_template['name']}**")
-            st.caption(selected_template.get('description', ''))
-            
-    with sel_col2:
-        if selected_template["id"] != "none" and selected_template.get("preview_markdown"):
-            st.markdown("**Preview**")
-            # Using a container with border for the preview block
-            with st.container(border=True):
-                st_markdown(selected_template["preview_markdown"])
-        else:
-            st.markdown("**Preview**")
-            st.info("No template selected.")
-            
-    st.write("") # Spacer
-
-    col1, col2 = st.columns([4, 1])
-    with col1:
-        submit_btn = st.button("Clean Note 🚀", disabled=submit_disabled, use_container_width=True)
-    with col2:
+    col_header1, col_header2 = st.columns([4, 1])
+    with col_header1:
+        st.subheader("1. Enter Your Messy Note")
+    with col_header2:
         # Simple reset button to clear states
         clear_btn = st.button("Clear 🗑", use_container_width=True)
         if clear_btn:
+            st.session_state.raw_text_input = ""
             st.session_state.refactored_markdown = ""
             st.session_state.user_edited_markdown = ""
             st.session_state.suggested_filename = "untitled-note.md"
             st.session_state.last_processed_raw = ""
             st.rerun()
+    
+    raw_text = st.text_area(
+        "Paste your unformatted notes or rough text below:",
+        height=200,
+        placeholder="e.g. metting w/ bob at 2pm. discussed roadmap. need to finish widgets by friday. bob will write tests.",
+        help="Paste your rough thoughts, transcripts, or unformatted text here.",
+        key="raw_text_input"
+    )
+
+    # Disable button if key is missing or no text is entered
+    submit_disabled = not api_key or not raw_text.strip()
+    
+    # Template Selection UI (placed in sidebar)
+    with st.sidebar:
+        st.header("📄 Template Options")
+        template_options = [{"id": "none", "name": "No template"}] + templates
+        selected_template_idx = st.selectbox(
+            "Select Template",
+            range(len(template_options)),
+            format_func=lambda i: template_options[i]["name"]
+        )
+        include_fm = st.radio("Include frontmatter", options=["Yes", "No"], index=1, horizontal=True)
+        include_frontmatter = (include_fm == "Yes")
+        selected_template = template_options[selected_template_idx]
+        
+    st.subheader("2. Selected Template Preview")
+    if selected_template["id"] != "none" and selected_template.get("preview_markdown"):
+        st.markdown(f"**{selected_template['name']}**")
+        st.caption(selected_template.get('description', ''))
+        with st.container(border=True):
+            st_markdown(selected_template["preview_markdown"])
+    else:
+        st.info("No template selected.")
+            
+    st.write("") # Spacer
+
+    submit_btn = st.button("Clean Note 🚀", disabled=submit_disabled, use_container_width=True)
 
     # 5. Core Refactor Execution
     if submit_btn and not submit_disabled:
