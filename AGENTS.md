@@ -34,6 +34,13 @@ models/
 utils/
   markdown_utils.py           # Markdown helpers
 tests/                        # pytest unit tests (12 passing)
+docs/ 
+  storage.md
+  architecture.md
+  project-prompt.md 
+  use_cases.md 
+  vision.md
+
 ```
 
 ## Domain Rules & Constraints
@@ -64,8 +71,16 @@ For full context on goals, use cases, and architecture decisions, consult:
 4. **Write or update tests** for any logic added to `agents/`, `services/`, or `utils/`.
 5. **Do not over-engineer**: only add what was asked. No unsolicited refactors, comments, or abstractions.
 6. **Run tests** after changes: `pytest tests/` in the virtualenv (`.venv`).
+7. **Update Doc** after changes. Make sure you update the following files if necessary:
+   - `docs/project-plan/vision.md`
+   - `docs/project-plan/architecture.md`
+   - `docs/project-plan/use_cases.md`
+   - `docs/project-plan/roadmap.md`
+   - `docs/project-implementation-artifacts-v1/walkthrough.md`
+   - `README.md`
+   - `docs/developer-guide.md`
 
-## Constraints
+## Constraints (overwritten on user request only)
 
 - DO NOT add chat interfaces, conversation history, or memory features.
 - DO NOT modify the single-transformation user flow.
