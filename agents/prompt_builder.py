@@ -62,16 +62,34 @@ STYLE_INSTRUCTIONS = {
     )
 }
 
-def build_system_prompt(mode: str, style: str) -> str:
-    """Builds the system instructions based on the selected mode and style."""
+def build_system_prompt(mode: str, style: str, template_instruction: str = None, template_description: str = None, include_frontmatter: bool = False) -> str:
+    """Builds the system instructions based on the selected mode and style, and applies template instructions if present."""
     mode_desc = REFACTOR_MODE_INSTRUCTIONS.get(mode, REFACTOR_MODE_INSTRUCTIONS[REFACTOR_CONSERVATIVE])
     style_desc = STYLE_INSTRUCTIONS.get(style, STYLE_INSTRUCTIONS[STYLE_ADAPTIVE])
     
-    return f"{SYSTEM_PROMPT}\n\n{mode_desc}\n\n{style_desc}"
+    prompt = f"{SYSTEM_PROMPT}\n\n{mode_desc}\n\n{style_desc}"
+    
+    if template_instruction or template_description:
+        prompt += "\n\nADDITIONAL TEMPLATE INSTRUCTIONS:\n"
+        prompt += "The following instructions must be applied to the output. These instructions complement the style and mode above.\n"
+        if template_description:
+            prompt += f"Template Description: {template_description}\n"
+        if template_instruction:
+            prompt += f"Template Instructions: {template_instruction}\n"
+            
+    if include_frontmatter:
+        prompt += "\n\nFRONTMATTER REQUIRED:\n"
+        prompt += "You MUST include a valid YAML frontmatter block at the very top of the markdown output.\n"
+        prompt += "The frontmatter must contain at least the following fields:\n"
+        prompt += "- title: A suitable title for the note\n"
+        prompt += "- keywords: A list of up to 5 relevant keywords extracted from the content\n"
+        prompt += "Example format:\n---\ntitle: \"Meeting Notes\"\nkeywords: [\"meeting\", \"roadmap\", \"widgets\"]\n---\n"
+        
+    return prompt
 
-def build_prompt_messages(raw_text: str, mode: str, style: str) -> list:
+def build_prompt_messages(raw_text: str, mode: str, style: str, template_instruction: str = None, template_description: str = None, include_frontmatter: bool = False) -> list:
     """Builds list of messages (system and user) for the ChatCompletion API."""
-    system_content = build_system_prompt(mode, style)
+    system_content = build_system_prompt(mode, style, template_instruction, template_description, include_frontmatter)
     user_content = f"Here is the raw note to refactor:\n\n{raw_text}"
     
     return [

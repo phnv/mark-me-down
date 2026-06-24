@@ -1,9 +1,17 @@
 import streamlit as st
+import os
+from dotenv import load_dotenv
+from st_supabase_connection import SupabaseConnection, execute_query
+from streamlit_markdown import st_markdown
+
 from models.request_models import RefactorRequest
 from services.openai_service import OpenAIService
 from services.clipboard_service import copy_to_clipboard
 from agents.note_refactor_agent import NoteRefactorAgent
 from ui.widgets import render_sidebar_api_key, render_sidebar_options
+
+# Load environment variables
+load_dotenv()
 
 def render_home_page():
     """Renders the main content area of the Mark-me-down application."""
@@ -67,6 +75,24 @@ def render_home_page():
     if "last_processed_raw" not in st.session_state:
         st.session_state.last_processed_raw = ""
 
+    # Fetch templates from Supabase
+    templates = []
+    try:
+        # Initialize connection. Provide kwargs explicitly as fallback if secrets.toml isn't used.     
+        conn = st.connection(
+            "supabase", 
+            type=SupabaseConnection, 
+            url=os.environ.get("SUPABASE_URL"), 
+            key=os.environ.get("SUPABASE_KEY")
+        )
+        rows = execute_query(conn.table("templates").select("*"),
+            ttl="10m"
+        )
+        templates = rows.data
+
+    except Exception as e:
+        st.warning(f"Could not load templates: {e}")
+
     # 4. Input Section
     st.subheader("1. Enter Your Messy Note")
     
@@ -80,6 +106,41 @@ def render_home_page():
     # Disable button if key is missing or no text is entered
     submit_disabled = not api_key or not raw_text.strip()
     
+    # Template Selection UI (placed above the button)
+    st.subheader("2. Select Template & Options")
+    
+    template_options = [{"id": "none", "name": "No template"}] + templates
+    
+    # Use columns to place drop-down menu and preview block side by side
+    sel_col1, sel_col2 = st.columns([1, 1])
+    
+    with sel_col1:
+        selected_template_idx = st.selectbox(
+            "Select Template",
+            range(len(template_options)),
+            format_func=lambda i: template_options[i]["name"]
+        )
+        
+        include_fm = st.radio("Include frontmatter", options=["Yes", "No"], index=1, horizontal=True)
+        include_frontmatter = (include_fm == "Yes")
+        
+        selected_template = template_options[selected_template_idx]
+        if selected_template["id"] != "none":
+            st.markdown(f"**{selected_template['name']}**")
+            st.caption(selected_template.get('description', ''))
+            
+    with sel_col2:
+        if selected_template["id"] != "none" and selected_template.get("preview_markdown"):
+            st.markdown("**Preview**")
+            # Using a container with border for the preview block
+            with st.container(border=True):
+                st_markdown(selected_template["preview_markdown"])
+        else:
+            st.markdown("**Preview**")
+            st.info("No template selected.")
+            
+    st.write("") # Spacer
+
     col1, col2 = st.columns([4, 1])
     with col1:
         submit_btn = st.button("Clean Note 🚀", disabled=submit_disabled, use_container_width=True)
@@ -104,7 +165,10 @@ def render_home_page():
                 request_model = RefactorRequest(
                     raw_text=raw_text,
                     refactor_mode=mode,
-                    output_style=style
+                    output_style=style,
+                    template_instruction=selected_template.get("instructions") if selected_template["id"] != "none" else None,
+                    template_description=selected_template.get("description") if selected_template["id"] != "none" else None,
+                    include_frontmatter=include_frontmatter
                 )
                 
                 response = agent.refactor(request_model)

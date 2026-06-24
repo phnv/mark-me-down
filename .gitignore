@@ -159,3 +159,5 @@ Thumbs.db
 .idea/
 *.swp
 *.swo
+.claude/skills/developing-with-streamlit
+.gitignore

@@ -18,7 +18,10 @@ class NoteRefactorAgent:
         messages = build_prompt_messages(
             raw_text=request.raw_text,
             mode=request.refactor_mode,
-            style=request.output_style
+            style=request.output_style,
+            template_instruction=request.template_instruction,
+            template_description=request.template_description,
+            include_frontmatter=request.include_frontmatter
         )
         
         # 2. Query OpenAI API

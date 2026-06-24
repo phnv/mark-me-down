@@ -1,0 +1,276 @@
+[
+    {
+        "id": "zettelkasten",
+        "name": "Zettelkasten",
+        "description": "Atomic note format emphasizing one idea per note and explicit links between concepts.",
+        "category": "Knowledge Management",
+        "tags": [
+            "notes",
+            "knowledge-management",
+            "atomic-notes",
+            "research"
+        ],
+        "version": 1,
+        "instructions": (
+            "Capture a single idea per note. Use concise language and "
+            "create links to related concepts whenever possible."
+        ),
+        "template_markdown": """---
+id: [NOTE_ID]
+title: "[TITLE]"
+tags: [tag1, tag2]
+aliases: []
+---
+
+# [TITLE]
+
+Write a concise description of a single concept.
+
+## Related Concepts
+
+- [[Related Note 1]]
+- [[Related Note 2]]
+""",
+        "preview_markdown": """---
+id: 202606210201
+title: "Quantum Entanglement"
+tags: [physics, quantum-mechanics]
+aliases: [Spooky Action]
+---
+
+# Quantum Entanglement
+
+Quantum entanglement describes the phenomenon where two particles become correlated in such a way that measuring one affects the state of the other.
+
+## Related Concepts
+
+- [[Wave Function Collapse]]
+- [[Quantum Computing]]
+"""
+    },
+
+    {
+        "id": "feynman",
+        "name": "Feynman Technique",
+        "description": "Learning framework that encourages explaining concepts in simple language and identifying gaps in understanding.",
+        "category": "Learning",
+        "tags": [
+            "learning",
+            "teaching",
+            "understanding"
+        ],
+        "version": 1,
+        "instructions": (
+            "Explain the topic in simple terms, identify gaps in understanding, "
+            "and refine your explanation using reliable sources."
+        ),
+        "template_markdown": """# Topic: [TOPIC]
+
+## 1. Plain Explanation
+
+> Explain it as if speaking to a child. Avoid jargon.
+
+[Simple explanation]
+
+## 2. Identified Knowledge Gaps
+
+- [ ] Gap 1
+- [ ] Gap 2
+
+## 3. Refined Source Material
+
+- [Source Link](URL) — Clarification or supporting information.
+""",
+        "preview_markdown": """# Topic: TCP Handshake
+
+## 1. Plain Explanation
+
+> Explain it as if speaking to a child. Avoid jargon.
+
+Before two computers can talk, they first greet each other and agree that both are ready to communicate.
+
+## 2. Identified Knowledge Gaps
+
+- [ ] Unsure why the ACK packet is required.
+- [ ] Need to review retransmissions.
+
+## 3. Refined Source Material
+
+- [RFC 793](https://datatracker.ietf.org/doc/html/rfc793) — Defines TCP behavior.
+"""
+    },
+
+    {
+        "id": "soap",
+        "name": "SOAP Note",
+        "description": "Standard clinical documentation framework used in healthcare and counseling.",
+        "category": "Healthcare",
+        "tags": [
+            "medical",
+            "clinical",
+            "documentation"
+        ],
+        "version": 1,
+        "instructions": (
+            "Separate subjective information, objective observations, "
+            "assessment, and the action plan."
+        ),
+        "template_markdown": """# Patient Session: [PATIENT]
+
+**Date:** [DATE]
+
+## 1. Subjective (S)
+
+Patient-reported symptoms and concerns.
+
+## 2. Objective (O)
+
+Observable or measurable information.
+
+## 3. Assessment (A)
+
+Clinical impression or diagnosis.
+
+## 4. Plan (P)
+
+- [ ] Action item 1
+- [ ] Action item 2
+""",
+        "preview_markdown": """# Patient Session: John Doe
+
+**Date:** 2026-06-21
+
+## 1. Subjective (S)
+
+Patient reports feeling overwhelmed by work responsibilities and difficulty sleeping.
+
+## 2. Objective (O)
+
+- Heart rate: 72 bpm
+- Missed two appointments this month
+
+## 3. Assessment (A)
+
+Mild situational anxiety aggravated by work stress.
+
+## 4. Plan (P)
+
+- [ ] Assign mindfulness exercises
+- [ ] Schedule follow-up in two weeks
+"""
+    },
+
+    {
+        "id": "adr",
+        "name": "Architectural Decision Record",
+        "description": "Structured format for documenting important technical decisions and their consequences.",
+        "category": "Software Engineering",
+        "tags": [
+            "architecture",
+            "decision-record",
+            "software-engineering"
+        ],
+        "version": 1,
+        "instructions": (
+            "Document the context, the decision taken, and its consequences."
+        ),
+        "template_markdown": """# ADR [NUMBER]: [TITLE]
+
+## Status
+
+Proposed | Accepted | Superseded
+
+## Context
+
+Describe the problem and constraints.
+
+## Decision
+
+Describe the chosen approach.
+
+## Consequences
+
+### Good
+
+- Benefit 1
+
+### Bad
+
+- Drawback 1
+""",
+        "preview_markdown": """# ADR 003: Use PostgreSQL for Main Database
+
+## Status
+
+Accepted
+
+## Context
+
+The application requires a relational database with strong support for JSON querying.
+
+## Decision
+
+Use PostgreSQL 16 managed via AWS RDS.
+
+## Consequences
+
+### Good
+
+- Strong data integrity
+- Excellent JSON support
+
+### Bad
+
+- Higher operational overhead compared to DynamoDB
+"""
+    },
+
+    {
+        "id": "changelog",
+        "name": "Keep a Changelog",
+        "description": "Standard structure for recording additions, changes, and fixes across software releases.",
+        "category": "Software Engineering",
+        "tags": [
+            "changelog",
+            "release-notes",
+            "software"
+        ],
+        "version": 1,
+        "instructions": (
+            "Organize changes by release and classify entries into Added, "
+            "Changed, Fixed, Removed, Deprecated, or Security sections."
+        ),
+        "template_markdown": """# Changelog
+
+## [VERSION] - [DATE]
+
+### Added
+
+- New feature
+
+### Changed
+
+- Improvement
+
+### Fixed
+
+- Bug fix
+""",
+        "preview_markdown": """# Changelog
+
+## 1.2.0 - 2026-06-21
+
+### Added
+
+- Functional gallery layout feature
+
+### Changed
+
+- Refactored text parsers to support tables
+
+### Fixed
+
+- Fixed broken layout elements on mobile viewports
+"""
+    }
+]
