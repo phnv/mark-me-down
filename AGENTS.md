@@ -86,3 +86,5 @@ For full context on goals, use cases, and architecture decisions, consult:
 - DO NOT modify the single-transformation user flow.
 - DO NOT mix prompt construction logic into orchestration code.
 - DO NOT add features beyond what is explicitly requested.
+
+---

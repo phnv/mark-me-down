@@ -1,0 +1,10 @@
+{
+  "skills": [
+    {
+      "source": "openai/skills",
+      "skills": [
+        "jupyter-notebook"
+      ]
+    }
+  ]
+}
