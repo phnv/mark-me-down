@@ -1,15 +1,19 @@
 import ast
 from pathlib import Path
-
+import jsonlines
 # Resolve project root directory
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
+print("PROJECT_ROOT:", PROJECT_ROOT)
 # Path to the data file
-jsonl_path = PROJECT_ROOT / "dev" / "data" / "inital-data.jsonl"
+jsonl_path = PROJECT_ROOT / "dev" / "data" / "templates-enriched-data.jsonl"
 
 # Read and parse the templates from the python-literal-structured jsonl file
-with open(jsonl_path, "r", encoding="utf-8") as f:
-    templates = ast.literal_eval(f.read())
+# with open(jsonl_path, "r", encoding="utf-8") as f:
+#     templates = ast.literal_eval(f.read())
+
+with jsonlines.open(jsonl_path, mode="r") as reader:
+    templates = list(reader)
 
 print(f"Loaded {len(templates)} templates.")
 
@@ -36,7 +40,7 @@ print("Connected to Supabase")
 print(f"Preparing to insert {len(templates)} templates...")
 
 for template in templates:
-    print(f"Inserting '{template['id']}'...")
+    print(f"Inserting {template['id']}...")
     print("Template:", template)
     result = (
         supabase
