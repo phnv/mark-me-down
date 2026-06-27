@@ -1,14 +1,14 @@
+# pyrefly: ignore [missing-import]
 import streamlit as st
 import os
+# pyrefly: ignore [missing-import]
 from dotenv import load_dotenv
-from st_supabase_connection import SupabaseConnection, execute_query
+# pyrefly: ignore [missing-import]
 from streamlit_markdown import st_markdown
-
-from models.request_models import RefactorRequest
-from services.openai_service import OpenAIService
+from agents.v2.runner import run_workflow_sync
 from services.clipboard_service import copy_to_clipboard
-from agents.note_refactor_agent import NoteRefactorAgent
-from ui.widgets import render_sidebar_api_key, render_sidebar_options
+from services.filename_service import suggest_filename
+from ui.widgets import render_sidebar_api_key, render_sidebar_options, get_templates
 
 # Load environment variables
 load_dotenv()
@@ -62,8 +62,8 @@ def render_home_page():
     st.divider()
 
     # 2. Sidebar Integration (BYOK and parameters)
-    api_key = render_sidebar_api_key()
-    mode, style = render_sidebar_options()
+    provider, api_key = render_sidebar_api_key()
+    mode, style, template_id, include_frontmatter = render_sidebar_options()
 
     # 3. Initialize state variables
     if "refactored_markdown" not in st.session_state:
@@ -77,23 +77,7 @@ def render_home_page():
     if "raw_text_input" not in st.session_state:
         st.session_state.raw_text_input = ""
 
-    # Fetch templates from Supabase
-    templates = []
-    try:
-        # Initialize connection. Provide kwargs explicitly as fallback if secrets.toml isn't used.     
-        conn = st.connection(
-            "supabase", 
-            type=SupabaseConnection, 
-            url=os.environ.get("SUPABASE_URL"), 
-            key=os.environ.get("SUPABASE_KEY")
-        )
-        rows = execute_query(conn.table("templates").select("*"),
-            ttl="10m"
-        )
-        templates = rows.data
 
-    except Exception as e:
-        st.warning(f"Could not load templates: {e}")
 
     # 4. Input Section
     col_header1, col_header2 = st.columns([4, 1])
@@ -121,27 +105,20 @@ def render_home_page():
     # Disable button if key is missing or no text is entered
     submit_disabled = not api_key or not raw_text.strip()
     
-    # Template Selection UI (placed in sidebar)
-    with st.sidebar:
-        st.header("📄 Template Options")
-        template_options = [{"id": "none", "name": "No template"}] + templates
-        selected_template_idx = st.selectbox(
-            "Select Template",
-            range(len(template_options)),
-            format_func=lambda i: template_options[i]["name"]
-        )
-        include_fm = st.radio("Include frontmatter", options=["Yes", "No"], index=1, horizontal=True)
-        include_frontmatter = (include_fm == "Yes")
-        selected_template = template_options[selected_template_idx]
-        
     st.subheader("2. Selected Template Preview")
-    if selected_template["id"] != "none" and selected_template.get("preview_markdown"):
-        st.markdown(f"**{selected_template['name']}**")
-        st.caption(selected_template.get('description', ''))
-        with st.container(border=True):
-            st_markdown(selected_template["preview_markdown"])
+    if template_id == "auto":
+        st.info("Auto mode: The AI will select the best template for your note automatically.")
     else:
-        st.info("No template selected.")
+        templates = get_templates()
+        selected_template = next((t for t in templates if str(t.get("id")) == str(template_id)), None)
+        
+        if selected_template and selected_template.get("preview_markdown"):
+            st.markdown(f"**{selected_template['name']}**")
+            st.caption(selected_template.get('description', ''))
+            with st.container(border=True):
+                st_markdown(selected_template["preview_markdown"])
+        else:
+            st.info("No template selected.")
             
     st.write("") # Spacer
 
@@ -150,27 +127,33 @@ def render_home_page():
     # 5. Core Refactor Execution
     if submit_btn and not submit_disabled:
         try:
-            with st.spinner("Processing note through AI..."):
-                # Instantiate dependencies
-                openai_service = OpenAIService(api_key=api_key)
-                agent = NoteRefactorAgent(openai_service=openai_service)
+            with st.spinner("Processing note through ADK Workflow..."):
+                request_dict = {
+                    "raw_text": raw_text,
+                    "refactor_mode": mode,
+                    "rewrite_mode": style,
+                    "template_selection": template_id,
+                    "include_frontmatter": include_frontmatter
+                }
                 
-                request_model = RefactorRequest(
-                    raw_text=raw_text,
-                    refactor_mode=mode,
-                    output_style=style,
-                    template_instruction=selected_template.get("instructions") if selected_template["id"] != "none" else None,
-                    template_description=selected_template.get("description") if selected_template["id"] != "none" else None,
-                    include_frontmatter=include_frontmatter
+                final_output, similarity_score, template_match = run_workflow_sync(
+                    request_dict, provider, api_key
                 )
                 
-                response = agent.refactor(request_model)
+                suggested_filename = suggest_filename(final_output)
                 
                 # Save outputs in session state
-                st.session_state.refactored_markdown = response.formatted_markdown
-                st.session_state.user_edited_markdown = response.formatted_markdown
-                st.session_state.suggested_filename = response.suggested_filename
+                st.session_state.refactored_markdown = final_output
+                st.session_state.user_edited_markdown = final_output
+                st.session_state.suggested_filename = suggested_filename
                 st.session_state.last_processed_raw = raw_text
+                st.session_state.similarity_score = similarity_score
+                
+                if template_match:
+                    t_name = template_match.name if hasattr(template_match, 'name') else template_match.get("name")
+                    st.session_state.selected_template_name = t_name
+                else:
+                    st.session_state.selected_template_name = None
                 
         except Exception as e:
             st.error(f"Error refactoring note: {str(e)}")
@@ -179,6 +162,12 @@ def render_home_page():
     if st.session_state.refactored_markdown:
         st.divider()
         st.subheader("2. Refactored Markdown")
+        
+        # Display template similarity if auto was used
+        if st.session_state.get("selected_template_name"):
+            score = st.session_state.get("similarity_score")
+            score_text = f" (Similarity: {score:.3f})" if score is not None else ""
+            st.info(f"**Template Used:** {st.session_state.selected_template_name}{score_text}")
         
         tab_edit, tab_preview = st.tabs(["✏ Edit Markdown", "👁 Preview"])
         
