@@ -11,7 +11,8 @@ def get_note_profiler_agent(provider: str) -> LlmAgent:
         from google.adk.models.lite_llm import LiteLlm
         model = LiteLlm(model="openai/gpt-4o-mini")
     else:
-        model = "gemini-2.5-pro"
+        # model = "gemini-2.5-pro" #gemini-3.1-flash-lite
+        model = "gemini-3.1-flash-lite"
         
     return LlmAgent(
         name="note_profiler",

@@ -54,42 +54,64 @@ def render_sidebar_options():
     """Renders the refactor mode, output style, and template selection in the sidebar."""
     st.sidebar.header("⚙ Options")
     
+    # helper for index
+    def get_index(options, current_value):
+        try:
+            return options.index(current_value)
+        except ValueError:
+            return 0
+            
     mode = st.sidebar.selectbox(
         "Refactor Mode",
         options=REFACTOR_MODES,
-        index=0,
+        index=get_index(REFACTOR_MODES, st.session_state.refactor_mode),
         format_func=lambda x: x.capitalize(),
         help="Conservative: fix typos only. Interpretative: clarify flow. Aggressive: complete rewrite."
     )
+    if mode != st.session_state.refactor_mode:
+        st.session_state.refactor_mode = mode
+        # st.rerun()
     
     style = st.sidebar.selectbox(
         "Rewriting Style",
         options=STYLE_MODES,
-        index=0,
+        index=get_index(STYLE_MODES, st.session_state.rewrite_style),
         format_func=lambda x: x.capitalize(),
         help="Target rewriting style for the output markdown."
     )
+    if style != st.session_state.rewrite_style:
+        st.session_state.rewrite_style = style
+        # st.rerun()
     
     st.sidebar.divider()
-    
 
-    templates = get_templates()
+    templates = st.session_state.get("templates", [])
     
     template_options = [("auto", "Auto (Let RAG decide)")]
     for t in templates:
-        template_options.append((t["id"], t["name"]))
+        template_options.append((str(t["id"]), t["name"]))
+        
+    template_id_str = str(st.session_state.template_id) if st.session_state.template_id else "auto"
+    try:
+        t_index = [t[0] for t in template_options].index(template_id_str)
+    except ValueError:
+        t_index = 0
         
     template_id = st.sidebar.selectbox(
         "Template Selection",
         options=[t[0] for t in template_options],
         format_func=lambda x: next((name for id, name in template_options if id == x), x),
-        index=0,
+        index=t_index,
         help="Select 'Auto' to let the AI find the best template for your note, or pick one manually."
     )
+    if str(template_id) != template_id_str:
+        st.session_state.template_id = template_id
+        # st.rerun()
     
-    frontmatter = st.sidebar.checkbox("Include Frontmatter", value=False)
+    frontmatter = st.sidebar.checkbox("Include Frontmatter", value=st.session_state.include_frontmatter)
+    if frontmatter != st.session_state.include_frontmatter:
+        st.session_state.include_frontmatter = frontmatter
+        # st.rerun()
     
     st.sidebar.divider()
-    st.sidebar.caption(f"Running on ADK V2 Workflow")
-    
-    return mode, style, template_id, frontmatter
+    st.sidebar.caption("Running on ADK V2 Workflow")

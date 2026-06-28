@@ -61,23 +61,35 @@ def render_home_page():
     st.markdown("Transform messy, unformatted, or raw notes into clean, well-formatted markdown.")
     st.divider()
 
-    # 2. Sidebar Integration (BYOK and parameters)
-    provider, api_key = render_sidebar_api_key()
-    mode, style, template_id, include_frontmatter = render_sidebar_options()
-
-    # 3. Initialize state variables
+    # 1. Initialize state variables
     if "refactored_markdown" not in st.session_state:
         st.session_state.refactored_markdown = ""
     if "suggested_filename" not in st.session_state:
         st.session_state.suggested_filename = "untitled-note.md"
-    if "user_edited_markdown" not in st.session_state:
-        st.session_state.user_edited_markdown = ""
+    if "markdown_edit_area" not in st.session_state:
+        st.session_state.markdown_edit_area = ""
     if "last_processed_raw" not in st.session_state:
         st.session_state.last_processed_raw = ""
     if "raw_text_input" not in st.session_state:
         st.session_state.raw_text_input = ""
+        
+    # init sidebar options in session state
+    if "refactor_mode" not in st.session_state:
+        st.session_state.refactor_mode = "conservative"
+    if "rewrite_style" not in st.session_state:
+        st.session_state.rewrite_style = "adaptive"
+    if "template_id" not in st.session_state:
+        st.session_state.template_id = "auto"
+    if "include_frontmatter" not in st.session_state:
+        st.session_state.include_frontmatter = False
 
+    # 2. Load Templates
+    if "templates" not in st.session_state:
+        st.session_state.templates = get_templates()
 
+    # 3. Sidebar Integration (BYOK and parameters)
+    provider, api_key = render_sidebar_api_key()
+    render_sidebar_options()
 
     # 4. Input Section
     col_header1, col_header2 = st.columns([4, 1])
@@ -89,7 +101,7 @@ def render_home_page():
         if clear_btn:
             st.session_state.raw_text_input = ""
             st.session_state.refactored_markdown = ""
-            st.session_state.user_edited_markdown = ""
+            st.session_state.markdown_edit_area = ""
             st.session_state.suggested_filename = "untitled-note.md"
             st.session_state.last_processed_raw = ""
             st.rerun()
@@ -106,12 +118,10 @@ def render_home_page():
     submit_disabled = not api_key or not raw_text.strip()
     
     st.subheader("2. Selected Template Preview")
-    if template_id == "auto":
+    if st.session_state.template_id == "auto":
         st.info("Auto mode: The AI will select the best template for your note automatically.")
     else:
-        templates = get_templates()
-        selected_template = next((t for t in templates if str(t.get("id")) == str(template_id)), None)
-        
+        selected_template = next((t for t in st.session_state.templates if str(t.get("id")) == str(st.session_state.template_id)), None)
         if selected_template and selected_template.get("preview_markdown"):
             st.markdown(f"**{selected_template['name']}**")
             st.caption(selected_template.get('description', ''))
@@ -130,11 +140,14 @@ def render_home_page():
             with st.spinner("Processing note through ADK Workflow..."):
                 request_dict = {
                     "raw_text": raw_text,
-                    "refactor_mode": mode,
-                    "rewrite_mode": style,
-                    "template_selection": template_id,
-                    "include_frontmatter": include_frontmatter
+                    "refactor_mode": st.session_state.refactor_mode,
+                    "rewrite_mode": st.session_state.rewrite_style,
+                    "template_selection": st.session_state.template_id,
+                    "include_frontmatter": st.session_state.include_frontmatter
                 }
+
+                print("request_dict:")
+                print(request_dict)
                 
                 final_output, similarity_score, template_match = run_workflow_sync(
                     request_dict, provider, api_key
@@ -144,7 +157,11 @@ def render_home_page():
                 
                 # Save outputs in session state
                 st.session_state.refactored_markdown = final_output
-                st.session_state.user_edited_markdown = final_output
+                # FIX: when st.text_area has key="markdown_edit_area", Streamlit
+                # reads the widget value from session_state["markdown_edit_area"],
+                # ignoring the value= arg after first render. We must set the key
+                # directly so the new output appears in the edit box.
+                st.session_state.markdown_edit_area = final_output
                 st.session_state.suggested_filename = suggested_filename
                 st.session_state.last_processed_raw = raw_text
                 st.session_state.similarity_score = similarity_score
@@ -175,16 +192,15 @@ def render_home_page():
             # Let users edit the raw markdown output manually
             edited_text = st.text_area(
                 "Modify the markdown output if needed:",
-                value=st.session_state.user_edited_markdown,
                 height=300,
-                key="markdown_edit_area"
+                key="markdown_edit_area"  # Streamlit owns the value via this key
             )
-            st.session_state.user_edited_markdown = edited_text
             
         with tab_preview:
-            # Rendered HTML markdown preview
-            if st.session_state.user_edited_markdown:
-                st.markdown(st.session_state.user_edited_markdown)
+            # Rendered HTML markdown preview — read directly from the widget key
+            display_text = st.session_state.get("markdown_edit_area", "")
+            if display_text:
+                st.markdown(display_text)
             else:
                 st.info("Write or generate markdown to see preview.")
                 
@@ -193,12 +209,12 @@ def render_home_page():
         act_col1, act_col2 = st.columns([1, 1])
         with act_col1:
             # Custom HTML/JS clipboard copy button
-            copy_to_clipboard(st.session_state.user_edited_markdown, label="📋 Copy to Clipboard")
+            copy_to_clipboard(st.session_state.get("markdown_edit_area", ""), label="📋 Copy to Clipboard")
         with act_col2:
             # Native download button for file saving
             st.download_button(
                 label="📥 Download Markdown File",
-                data=st.session_state.user_edited_markdown,
+                data=st.session_state.get("markdown_edit_area", ""),
                 file_name=st.session_state.suggested_filename,
                 mime="text/markdown",
                 use_container_width=True

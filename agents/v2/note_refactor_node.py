@@ -4,18 +4,32 @@ from google.genai import types
 from agents.v2.models import UserRefactorRequest, NoteProfile, TemplateMatch
 from agents.prompt_builder import build_system_prompt
 
+
+def _dbg(label: str, value=None):
+    print(f"\n[DBG] ──── {label} ────")
+    if value is not None:
+        print(f"       {repr(value)[:300]}")
+
+
 @node
-def prepare_refactor_prompt(ctx, node_input: dict) -> types.Content:
+def prepare_refactor_prompt(ctx, node_input) -> types.Content:
     """Prepares the prompt content for the NoteRefactorAgent."""
+    _dbg("prepare_refactor_prompt ENTRY", f"node_input type={type(node_input)}")
+    # _dbg("prepare_refactor_prompt: ctx.state keys", list(dict(ctx.state)))
+
+    # FIX: ADK stores Pydantic models as dicts in state — reconstruct typed objects
+    raw_request = ctx.state.get("request")
+    _dbg("prepare_refactor_prompt: raw_request from state", raw_request)
+    request: UserRefactorRequest = UserRefactorRequest(**raw_request) if isinstance(raw_request, dict) else raw_request
     
-    # Extract the original request from state
-    request: UserRefactorRequest = ctx.state.get("request")
-    
-    # Extract template info from state if available
-    template_match: TemplateMatch = ctx.state.get("template_match")
-    
-    # Extract profile from state if available
-    note_profile: NoteProfile = ctx.state.get("note_profile")
+    # FIX: Reconstruct typed objects from state dicts
+    raw_template_match = ctx.state.get("template_match")
+    _dbg("prepare_refactor_prompt: raw_template_match from state", raw_template_match)
+    template_match: TemplateMatch = TemplateMatch(**raw_template_match) if isinstance(raw_template_match, dict) else raw_template_match
+
+    raw_note_profile = ctx.state.get("note_profile")
+    _dbg("prepare_refactor_prompt: raw_note_profile from state", raw_note_profile)
+    note_profile: NoteProfile = NoteProfile(**raw_note_profile) if isinstance(raw_note_profile, dict) else raw_note_profile
     
     template_instruction = None
     template_description = None
@@ -44,7 +58,12 @@ def prepare_refactor_prompt(ctx, node_input: dict) -> types.Content:
     # we can combine them into a single user message or use system instructions.
     # We will combine them as the instruction is dynamic.
     combined_prompt = f"System Instructions:\n{system_prompt}\n\nUser Request:\n{user_text}"
-    
+
+    _dbg("prepare_refactor_prompt EXIT",
+         f"template_match={'yes (id=' + template_match.id + ')' if template_match else 'None'}, "
+         f"note_profile={'yes' if note_profile else 'None'}, "
+         f"combined_prompt_len={len(combined_prompt)}")
+
     return types.Content(role="user", parts=[types.Part.from_text(text=combined_prompt)])
 
 def get_note_refactor_agent(provider: str) -> LlmAgent:
@@ -53,7 +72,8 @@ def get_note_refactor_agent(provider: str) -> LlmAgent:
         from google.adk.models.lite_llm import LiteLlm
         model = LiteLlm(model="openai/gpt-4o-mini")
     else:
-        model = "gemini-2.5-pro"
+        model = "gemini-3.1-flash-lite"
+
         
     return LlmAgent(
         name="note_refactor",

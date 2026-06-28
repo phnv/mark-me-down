@@ -20,7 +20,7 @@ STYLE_PLAIN = "plain"
 STYLE_TODO = "todo"
 STYLE_STRUCTURED = "structured"
 
-OUTPUT_STYLES = [
+STYLE_MODES = [
     STYLE_ADAPTIVE,
     STYLE_PLAIN,
     STYLE_TODO,

@@ -102,7 +102,7 @@ def fetch_all_templates() -> list[dict]:
     try:
         supabase = get_supabase_client()
         # We only need the id and name for the dropdown
-        result = supabase.table('templates').select('id, name, template_markdown, description, instructions').execute()
+        result = supabase.table('templates').select('id, name, template_markdown, description, instructions, preview_markdown').execute()
         return result.data
     except Exception as e:
         print(f"Error fetching templates: {e}")
