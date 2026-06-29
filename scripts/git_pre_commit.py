@@ -9,7 +9,8 @@ def main():
     try:
         staged_files = subprocess.check_output(
             ["git", "diff", "--cached", "--name-only", "--diff-filter=ACM"],
-            text=True
+            text=True,
+            encoding="utf-8"
         ).splitlines()
     except subprocess.CalledProcessError:
         sys.exit(0)
@@ -22,7 +23,7 @@ def main():
     # 2. Rodar Semgrep
     try:
         semgrep_cmd = ["semgrep", "--config", ".semgrep.yaml", "--json"] + py_files
-        result = subprocess.run(semgrep_cmd, capture_output=True, text=True)
+        result = subprocess.run(semgrep_cmd, capture_output=True, text=True, encoding="utf-8")
         
         # Faz parse do JSON resultante do Semgrep
         output = json.loads(result.stdout)
