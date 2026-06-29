@@ -3,7 +3,7 @@ import streamlit as st
 import os
 from config import REFACTOR_MODES, STYLE_MODES, DEFAULT_MODEL
 
-def render_sidebar_api_key():
+def RENAMED_render_sidebar_api_key():
     """Renders the Provider and API key input field in the sidebar and manages its session state."""
     st.sidebar.header("🔑 Authentication")
     
