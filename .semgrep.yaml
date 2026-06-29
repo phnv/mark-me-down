@@ -1,0 +1,10 @@
+rules:
+  - id: python-structural-elements
+    patterns:
+      - pattern-either:
+          - pattern: def $FUNC(...)
+          - pattern: class $CLASS(...)
+    message: "Elementos estruturais (classes ou funções) identificados neste arquivo."
+    languages:
+      - python
+    severity: INFO

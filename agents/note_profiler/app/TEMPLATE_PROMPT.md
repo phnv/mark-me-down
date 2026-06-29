@@ -308,7 +308,7 @@ Other styles:
 * wiki-style
 * report-style
 * handbook-style
-* note-like
+* simple-note
 * checklist-oriented
 * reference-oriented
 * chronological

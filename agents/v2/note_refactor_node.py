@@ -66,7 +66,7 @@ def prepare_refactor_prompt(ctx, node_input) -> types.Content:
 
     return types.Content(role="user", parts=[types.Part.from_text(text=combined_prompt)])
 
-def get_note_refactor_agent(provider: str) -> LlmAgent:
+def TEST_get_note_refactor_agent(provider: str) -> LlmAgent:
     """Returns a NoteRefactor LlmAgent configured for the selected provider."""
     if provider.lower() == "openai":
         from google.adk.models.lite_llm import LiteLlm
