@@ -1,6 +1,12 @@
 {
   "skills": [
     {
+      "source": "github/awesome-copilot",
+      "skills": [
+        "create-readme"
+      ]
+    },
+    {
       "source": "openai/skills",
       "skills": [
         "jupyter-notebook"

@@ -6,7 +6,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 print("PROJECT_ROOT:", PROJECT_ROOT)
 # Path to the data file
-jsonl_path = PROJECT_ROOT / "dev" / "data" / "templates-enriched-data.jsonl"
+jsonl_path = PROJECT_ROOT / "dev" / "data" / "templates-enriched-data-set2.jsonl"
 
 # Read and parse the templates from the python-literal-structured jsonl file
 # with open(jsonl_path, "r", encoding="utf-8") as f:
