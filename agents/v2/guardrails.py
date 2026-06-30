@@ -84,10 +84,45 @@ def _check_injection_openai_sync(text: str, api_key: str) -> bool:
 
 async def _check_injection_openai(text: str, api_key: str) -> bool:
     """Async wrapper: runs the sync LiteLLM call in a thread executor."""
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_running_loop()
     return await loop.run_in_executor(
         None, _check_injection_openai_sync, text, api_key
     )
+
+
+async def run_pre_workflow_checks(raw_text: str, provider: str, api_key: str) -> str | None:
+    """
+    Run pre-workflow guardrails on raw user text.
+
+    Called directly by the runner BEFORE the ADK workflow starts — this avoids
+    feeding a guardrail block response into agents that have output_schema set,
+    which would cause a Pydantic ValidationError.
+
+    Returns:
+        A human-readable block reason string if the text should be rejected,
+        or None if the text is clean and the workflow may proceed.
+    """
+    # 1. Length check
+    if len(raw_text.strip()) > MAX_INPUT_LENGTH:
+        return (
+            f"Input text exceeds the {MAX_INPUT_LENGTH} character limit. "
+            "Please shorten your note."
+        )
+
+    # 2. Prompt injection detection via lightweight LLM
+    try:
+        if provider.lower() == "openai":
+            injected = await _check_injection_openai(raw_text, api_key)
+        else:
+            injected = await _check_injection_gemini(raw_text, api_key)
+
+        if injected:
+            return "Potential prompt injection detected. Your request has been blocked for safety."
+    except Exception as e:
+        # Fail open: if the check itself errors, let the workflow proceed.
+        print(f"[Guardrail] Pre-workflow injection check failed ({provider}): {e}")
+
+    return None
 
 
 async def pre_workflow_guardrail_callback(

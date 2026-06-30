@@ -6,7 +6,7 @@ from google.adk.runners import InMemoryRunner
 from google.genai import types
 from agents.v2.workflow import get_refactor_workflow
 from agents.v2.models import TemplateMatch
-from agents.v2.guardrails import GUARDRAIL_PREFIX
+from agents.v2.guardrails import GUARDRAIL_PREFIX, run_pre_workflow_checks
 
 # Workaround for Python Windows asyncio ProactorBasePipeTransport bug
 if sys.platform == 'win32':
@@ -51,8 +51,20 @@ async def _run_workflow_async(runner, request_dict: dict, provider: str, api_key
     session.state["api_key"] = api_key
     _dbg("_run_workflow_async: session.state pre-seeded", {"provider": provider, "api_key": bool(api_key)})
 
-    import json
+    # -------------------------------------------------------------------
+    # Pre-workflow guardrails: length + injection check.
+    # Run BEFORE the ADK workflow starts so that a blocked response is
+    # never fed into an LlmAgent that has output_schema set (which would
+    # cause a Pydantic ValidationError trying to parse the GUARDRAIL text).
+    # -------------------------------------------------------------------
+    raw_text = request_dict.get("raw_text", "")
+    block_reason = await run_pre_workflow_checks(raw_text, provider, api_key)
+    if block_reason:
+        _dbg("_run_workflow_async: PRE-WORKFLOW GUARDRAIL triggered", block_reason)
+        return None, "GUARDRAIL", block_reason
 
+
+    import json
     message_content = types.Content(
         role="user",
         parts=[types.Part.from_text(text=json.dumps(request_dict))]
