@@ -3,6 +3,7 @@ from google.adk.workflow import node
 from google.genai import types
 from agents.v2.models import UserRefactorRequest, NoteProfile, TemplateMatch
 from agents.prompt_builder import build_system_prompt
+from agents.v2.guardrails import pre_workflow_guardrail_callback, post_workflow_guardrail_callback
 
 
 def _dbg(label: str, value=None):
@@ -80,5 +81,7 @@ def get_note_refactor_agent(provider: str) -> LlmAgent:
         model=model,
         instruction="You are a markdown formatting assistant. Follow the system instructions exactly.",
         output_key="refactored_markdown",
+        before_model_callback=pre_workflow_guardrail_callback,
+        after_model_callback=post_workflow_guardrail_callback,
         rerun_on_resume=True
     )

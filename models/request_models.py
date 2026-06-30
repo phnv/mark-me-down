@@ -1,4 +1,5 @@
-from pydantic import BaseModel, Field, Optional
+from typing import Optional
+from pydantic import BaseModel, Field
 from config import REFACTOR_CONSERVATIVE, STYLE_ADAPTIVE
 
 class RefactorRequest(BaseModel):

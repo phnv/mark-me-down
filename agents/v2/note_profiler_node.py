@@ -1,6 +1,7 @@
 import os
 from google.adk.agents import LlmAgent
 from agents.v2.models import NoteProfile
+from agents.v2.guardrails import pre_workflow_guardrail_callback
 
 with open(os.path.join(os.path.dirname(__file__), "..", "..", "docs", "v2-planning-implementation-artifacts", "NOTE_PROFILER_AGENT_PROMPT.md"), "r", encoding="utf-8") as f:
     PROMPT_TEXT = f.read()
@@ -20,5 +21,6 @@ def get_note_profiler_agent(provider: str) -> LlmAgent:
         instruction=PROMPT_TEXT,
         output_schema=NoteProfile,
         output_key="note_profile",
+        before_model_callback=pre_workflow_guardrail_callback,
         rerun_on_resume=True
     )

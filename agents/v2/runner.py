@@ -6,6 +6,7 @@ from google.adk.runners import InMemoryRunner
 from google.genai import types
 from agents.v2.workflow import get_refactor_workflow
 from agents.v2.models import TemplateMatch
+from agents.v2.guardrails import GUARDRAIL_PREFIX
 
 # Workaround for Python Windows asyncio ProactorBasePipeTransport bug
 if sys.platform == 'win32':
@@ -112,9 +113,17 @@ async def _run_workflow_async(runner, request_dict: dict, provider: str, api_key
         elif isinstance(raw_refactored, types.Content):
             final_output = raw_refactored.parts[0].text
         else:
-            # Fallback — stringify whatever we got
             final_output = str(raw_refactored)
         _dbg("_run_workflow_async: final_output set from refactored_markdown", f"len={len(final_output)}")
+
+        # --- Guardrail sentinel detection -----------------------------------
+        # Both pre- and post-workflow callbacks prefix blocked responses with
+        # GUARDRAIL_PREFIX so we can distinguish them from real markdown output.
+        if final_output.startswith(GUARDRAIL_PREFIX):
+            reason = final_output[len(GUARDRAIL_PREFIX):].strip()
+            _dbg("_run_workflow_async: GUARDRAIL triggered", reason)
+            return None, "GUARDRAIL", reason
+        # --------------------------------------------------------------------
     else:
         final_output = None
         _dbg("_run_workflow_async: WARNING — refactored_markdown not found in state")

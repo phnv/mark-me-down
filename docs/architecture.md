@@ -14,6 +14,8 @@ The note refactor agent performs one task:
 
 raw note
 ↓
+Pre-Workflow Guardrails (length limit & prompt injection detection)
+↓
 understand meaning
 ↓
 organize ideas
@@ -21,6 +23,8 @@ organize ideas
 rewrite conservatively
 ↓
 generate markdown
+↓
+Post-Workflow Guardrails (HTML, leaked prompts, policy validation)
 
 The agent does not maintain memory or history.
 

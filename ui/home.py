@@ -152,25 +152,38 @@ def render_home_page():
                 final_output, similarity_score, template_match = run_workflow_sync(
                     request_dict, provider, api_key
                 )
-                
-                suggested_filename = suggest_filename(final_output)
-                
-                # Save outputs in session state
-                st.session_state.refactored_markdown = final_output
-                # FIX: when st.text_area has key="markdown_edit_area", Streamlit
-                # reads the widget value from session_state["markdown_edit_area"],
-                # ignoring the value= arg after first render. We must set the key
-                # directly so the new output appears in the edit box.
-                st.session_state.markdown_edit_area = final_output
-                st.session_state.suggested_filename = suggested_filename
-                st.session_state.last_processed_raw = raw_text
-                st.session_state.similarity_score = similarity_score
-                
-                if template_match:
-                    t_name = template_match.name if hasattr(template_match, 'name') else template_match.get("name")
-                    st.session_state.selected_template_name = t_name
-                else:
+
+                # --- Guardrail block detection ---------------------------------
+                # runner returns (None, "GUARDRAIL", reason_string) when a
+                # callback blocks the request. Surface this as a warning banner
+                # and suppress the output section entirely.
+                if similarity_score == "GUARDRAIL":
+                    reason = template_match  # reason_string is in the third slot
+                    st.warning(f"⚠️ Request blocked by safety guardrail: {reason}")
+                    # Clear any stale output from a previous successful run
+                    st.session_state.refactored_markdown = ""
+                    st.session_state.markdown_edit_area = ""
+                    st.session_state.suggested_filename = "untitled-note.md"
                     st.session_state.selected_template_name = None
+                else:
+                    # --- Normal success path ----------------------------------
+                    suggested_filename = suggest_filename(final_output)
+                    
+                    st.session_state.refactored_markdown = final_output
+                    # FIX: when st.text_area has key="markdown_edit_area", Streamlit
+                    # reads the widget value from session_state["markdown_edit_area"],
+                    # ignoring the value= arg after first render. We must set the key
+                    # directly so the new output appears in the edit box.
+                    st.session_state.markdown_edit_area = final_output
+                    st.session_state.suggested_filename = suggested_filename
+                    st.session_state.last_processed_raw = raw_text
+                    st.session_state.similarity_score = similarity_score
+                    
+                    if template_match:
+                        t_name = template_match.name if hasattr(template_match, 'name') else template_match.get("name")
+                        st.session_state.selected_template_name = t_name
+                    else:
+                        st.session_state.selected_template_name = None
                 
         except Exception as e:
             st.error(f"Error refactoring note: {str(e)}")
