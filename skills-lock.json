@@ -55,6 +55,12 @@
       "skillPath": "skills/.curated/jupyter-notebook/SKILL.md",
       "computedHash": "aec85b4976af33923f957db1667207dfe8418592ddd91bbe4da24bbdc3058d8c"
     },
+    "stride-analysis-patterns": {
+      "source": "sickn33/antigravity-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/stride-analysis-patterns/SKILL.md",
+      "computedHash": "dbdf17de9b0e84018274be92388b16875f0fa0005d1c1448714ac31964873572"
+    },
     "supabase-postgres-best-practices": {
       "source": "supabase/agent-skills",
       "sourceType": "github",
