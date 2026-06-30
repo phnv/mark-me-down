@@ -1,0 +1,118 @@
+id: todo_list
+
+name: To-do List
+
+description: >
+  A task management template for organizing actionable work by priority,
+  deadlines and execution context. Suitable for personal productivity,
+  project planning and daily execution.
+
+category: Productivity
+
+purpose:
+  - tasks
+  - planning
+  - execution
+  - productivity
+  - checklist
+
+tags:
+  - todo
+  - to_do
+  - task
+  - tasks
+  - checklist
+  - action_items
+  - productivity
+  - planning
+  - execution
+  - priorities
+  - priority
+  - due_date
+  - deadline
+  - context
+  - work
+  - personal
+  - errands
+  - organization
+  - task_management
+  - getting_things_done
+  - gtd
+  - kanban
+  - markdown
+
+instructions: >
+  Record only actionable items. Use Markdown checkboxes. Update status
+  continuously. Group related tasks together.
+
+organization_structure:
+  - checklist
+  - priority_based
+  - task_oriented
+  - grouped_sections
+  - actionable
+  - metadata_header
+  - productivity
+
+sections:
+  - Today
+  - High Priority
+  - Medium Priority
+  - Low Priority
+  - Waiting
+  - Completed
+  - Notes
+
+style:
+  - checklist
+  - productivity
+  - markdown
+
+preview_markdown: |
+  ---
+  due_date: 2026-07-05
+  context: Work
+  priority: High
+  ---
+
+  # Today
+
+  - [ ] Finish report
+  - [ ] Send email
+
+  # High Priority
+
+  - [ ] Deploy API
+
+  # Medium Priority
+
+  - [ ] Review documentation
+
+  # Waiting
+
+  - [ ] Client feedback
+
+  # Completed
+
+  - [x] Morning meeting
+
+template_markdown: |
+  ---
+  due_date:
+  context:
+  priority:
+  ---
+
+  # Today
+
+  # High Priority
+
+  # Medium Priority
+
+  # Low Priority
+
+  # Waiting
+
+  # Completed
+
+  # Notes

@@ -1,0 +1,114 @@
+id: resume
+
+name: Resume
+
+description: >
+  A professional résumé template for summarizing education, work experience,
+  technical skills, projects and achievements. Suitable for job applications,
+  networking and portfolio preparation.
+
+category: Career
+
+purpose:
+  - resume
+  - cv
+  - job_application
+  - portfolio
+
+tags:
+  - resume
+  - cv
+  - curriculum_vitae
+  - job_application
+  - career
+  - employment
+  - professional
+  - work_experience
+  - experience
+  - education
+  - projects
+  - portfolio
+  - skills
+  - certifications
+  - achievements
+  - qualifications
+  - recruiter
+  - hiring
+  - interview
+  - personal_branding
+  - linkedin
+
+
+instructions: >
+  Write concise achievement-oriented bullet points emphasizing measurable
+  impact. Prefer action verbs and quantify results whenever possible.
+
+organization_structure:
+  - hierarchical
+  - profile_based
+  - sectioned
+  - chronological
+  - achievement_oriented
+  - recruiter_friendly
+  - professional
+  
+sections:
+  - Presentation
+  - Experience
+  - Skills
+  - Projects
+  - Education
+  - Certifications
+  - Languages
+
+style:
+  - professional
+  - concise
+  - recruiter_friendly
+
+preview_markdown: |
+  # Pedro Vianna
+
+  ## Presentation
+
+  Data Scientist specializing in Generative AI and conversational systems.
+
+  ## Experience
+
+  ### AI Engineer
+
+  - Built production chatbot systems
+  - Improved automation workflows
+
+  ## Skills
+
+  - Python
+  - Machine Learning
+  - LLMs
+  - SQL
+
+  ## Projects
+
+  - Multi-agent Note Profiler
+  - Customer Support AI
+
+  ## Education
+
+  B.Sc. Computer Science
+
+template_markdown: |
+  # Your Name
+
+  ## Presentation
+
+  ## Experience
+
+  ## Skills
+
+  ## Projects
+
+  ## Education
+
+  ## Certifications
+
+  ## Languages

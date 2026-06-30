@@ -1,0 +1,142 @@
+id: recipe
+
+name: Recipe
+
+description: >
+  A culinary recipe template designed for documenting ingredients, preparation
+  steps, serving suggestions and cooking notes. It supports both quick recipes
+  and elaborate dishes while encouraging checklist-based cooking workflows.
+
+category: Cooking
+
+tags:
+  - recipe
+  - cooking
+  - baking
+  - food
+  - meal
+  - meal_prep
+  - meal_planning
+  - kitchen
+  - ingredients
+  - preparation
+  - cooking_steps
+  - instructions
+  - checklist
+  - grocery
+  - nutrition
+  - homemade
+  - cuisine
+  - dessert
+  - lunch
+  - dinner
+  - breakfast
+  - snack
+  - culinary
+  - cookbook
+  - markdown
+
+purpose:
+  - recipes
+  - meal_planning
+  - cooking
+  - baking
+  - food_documentation
+
+instructions: >
+  Use Markdown checkboxes for Ingredients and Preparation Steps only. Record
+  measurements whenever possible. Add tips learned after cooking so the recipe
+  continuously improves over time.
+
+organization_structure:
+  - procedural
+  - sequential
+  - checklist
+  - ingredients_first
+  - step_by_step
+  - sectioned
+  - instructional
+  - metadata_header
+
+sections:
+  - Metadata
+  - Description
+  - Ingredients
+  - Equipment
+  - Preparation
+  - Serving Suggestions
+  - Variations
+  - Notes
+
+style:
+  - procedural
+  - checklist
+  - markdown
+  - cooking
+
+preview_markdown: |
+  ---
+  recipe: Chocolate Cake
+  servings: 8
+  prep_time: 20 min
+  cook_time: 40 min
+  difficulty: Easy
+  ---
+
+  # Description
+
+  Moist homemade chocolate cake.
+
+  # Ingredients
+
+  - [ ] 2 cups flour
+  - [ ] 1 cup cocoa powder
+  - [ ] 2 eggs
+  - [ ] 1 cup milk
+
+  # Equipment
+
+  - Mixing bowl
+  - Cake pan
+
+  # Preparation
+
+  - [ ] Preheat oven to 180°C
+  - [ ] Mix dry ingredients
+  - [ ] Add wet ingredients
+  - [ ] Bake for 40 minutes
+
+  # Serving Suggestions
+
+  Serve warm with vanilla ice cream.
+
+  # Variations
+
+  Add walnuts.
+
+  # Notes
+
+  Bake 5 minutes less for softer texture.
+
+template_markdown: |
+  ---
+  recipe:
+  servings:
+  prep_time:
+  cook_time:
+  difficulty:
+  ---
+
+  # Description
+
+  # Ingredients
+
+  # Equipment
+
+  # Preparation
+
+  # Serving Suggestions
+
+  # Variations
+
+  # Notes

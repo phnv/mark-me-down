@@ -1,0 +1,127 @@
+id: weekly_journal
+
+name: Weekly Journal
+
+description: >
+  A weekly review template inspired by productivity systems such as GTD and
+  personal retrospectives. It helps consolidate accomplishments, identify
+  obstacles, review habits and define priorities for the upcoming week.
+
+tags:
+  - weekly_journal
+  - weekly_review
+  - weekly_log
+  - retrospective
+  - reflection
+  - review
+  - planning
+  - weekly_planning
+  - productivity
+  - goals
+  - priorities
+  - accomplishments
+  - wins
+  - challenges
+  - habit_tracking
+  - habits
+  - metrics
+  - personal_growth
+  - self_improvement
+  - gtd
+  - review_cycle
+  - life_management
+  
+category: Journaling
+
+purpose:
+  - weekly_review
+  - retrospective
+  - planning
+  - reflection
+  - habit_tracking
+
+instructions: >
+  Review the entire week before writing. Focus on trends instead of isolated
+  events. End with clear priorities and improvements for next week.
+
+organization_structure:
+  - retrospective
+  - weekly_review
+  - chronological
+  - sectioned
+  - reflection_based
+  - planning_oriented
+  - goal_oriented
+  
+sections:
+  - Wins
+  - Challenges
+  - Lessons Learned
+  - Habit Review
+  - Metrics
+  - Priorities
+  - Next Week Plan
+
+style:
+  - reflective
+  - structured
+  - planning
+
+preview_markdown: |
+  ---
+  week: 27
+  period: 2026-06-29 → 2026-07-05
+  ---
+
+  # Wins
+
+  - Finished portfolio project
+
+  # Challenges
+
+  - Time management
+
+  # Lessons Learned
+
+  Smaller milestones reduce procrastination.
+
+  # Habit Review
+
+  Exercise: 4/7
+
+  Reading: 5/7
+
+  # Metrics
+
+  - Applications sent: 8
+  - Hours studied: 18
+
+  # Priorities
+
+  - Portfolio
+  - Job search
+
+  # Next Week Plan
+
+  - Finish deployment
+  - Update LinkedIn
+
+template_markdown: |
+  ---
+  week:
+  period:
+  ---
+
+  # Wins
+
+  # Challenges
+
+  # Lessons Learned
+
+  # Habit Review
+
+  # Metrics
+
+  # Priorities
+
+  # Next Week Plan

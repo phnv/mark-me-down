@@ -1,0 +1,163 @@
+id: class_notes
+
+name: Class Notes
+
+description: >
+  A structured template for capturing notes during lectures, workshops,
+  university classes, online courses, training sessions, bootcamps and
+  educational presentations. It emphasizes separating factual class content
+  from personal reflections, questions and future study actions. The template
+  supports active learning, later revision and long-term knowledge retention.
+
+category: Education
+
+tags:
+  - class
+  - class_notes
+  - lecture
+  - lecture_notes
+  - course
+  - course_notes
+  - study
+  - study_notes
+  - education
+  - learning
+  - university
+  - college
+  - school
+  - workshop
+  - training
+  - seminar
+  - bootcamp
+  - certification
+  - lesson
+  - instructor
+  - facilitator
+  - classroom
+  - active_learning
+  - revision
+  - exam_preparation
+  - academic
+  - notes
+  - markdown
+  - knowledge_management
+
+purpose:
+  - lecture_notes
+  - class_notes
+  - course_notes
+  - study_notes
+  - workshop_notes
+  - training_notes
+  - learning
+  - revision
+
+instructions: >
+  Record information as the class progresses. Capture concepts rather than
+  verbatim transcription whenever possible. Use the "Questions & Doubts"
+  section for unresolved topics, "Insights" for important realizations and
+  "Quick Thoughts" for spontaneous observations. Summarize the lecture before
+  finishing the note.
+
+organization_structure:
+  - hierarchical
+  - chronological
+  - lecture_based
+  - sectioned
+  - note_taking
+  - educational
+  - summary_oriented
+
+sections:
+  - Metadata
+  - Learning Objectives
+  - Class Content
+  - Key Concepts
+  - Examples
+  - Questions & Doubts
+  - Quick Thoughts
+  - Insights
+  - Action Items
+  - Summary
+
+style:
+  - educational
+  - structured
+  - markdown
+  - academic
+  - study
+  - revision_friendly
+
+preview_markdown: |
+  ---
+  class: Machine Learning
+  date: 2026-07-01
+  topic: Gradient Descent
+  facilitator: Dr. Smith
+  ---
+
+  # Learning Objectives
+
+  - Understand optimization
+  - Learn learning rate effects
+
+  # Class Content
+
+  Gradient descent minimizes a loss function by iteratively updating parameters.
+
+  ## Key Concepts
+
+  - Learning rate
+  - Cost function
+  - Local minima
+
+  ## Examples
+
+  Logistic regression optimization.
+
+  # Questions & Doubts
+
+  - Why does Adam converge faster?
+
+  # Quick Thoughts
+
+  Maybe compare this with Newton's Method.
+
+  # Insights
+
+  Feature scaling directly improves convergence.
+
+  # Action Items
+
+  - Read Chapter 5
+  - Implement gradient descent
+
+  # Summary
+
+  Gradient descent is the foundation of many ML optimization algorithms.
+
+template_markdown: |
+  ---
+  class:
+  date:
+  topic:
+  facilitator:
+  ---
+
+  # Learning Objectives
+
+  # Class Content
+
+  # Key Concepts
+
+  # Examples
+
+  # Questions & Doubts
+
+  # Quick Thoughts
+
+  # Insights
+
+  # Action Items
+
+  # Summary

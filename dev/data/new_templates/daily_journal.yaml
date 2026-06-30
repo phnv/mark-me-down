@@ -1,0 +1,110 @@
+id: daily_journal
+
+name: Daily Journal
+
+description: >
+  A structured daily reflection template that combines journaling, gratitude,
+  mood tracking, accomplishments and planning. Suitable for self-awareness,
+  productivity reviews and personal growth.
+
+category: Journaling
+
+tags:
+  - daily_journal
+  - journal
+  - journaling
+  - diary
+  - daily_log
+  - reflection
+  - self_reflection
+  - gratitude
+  - mindfulness
+  - emotions
+  - mood
+  - mood_tracking
+  - personal_growth
+  - habits
+  - self_improvement
+  - productivity
+  - accomplishments
+  - lessons_learned
+  - planning
+  - life
+  - wellbeing
+  - markdown
+
+purpose:
+  - daily_reflection
+  - journaling
+  - self_improvement
+  - mindfulness
+
+instructions: >
+  Write honestly. Focus on meaningful events instead of exhaustive logs.
+  Capture emotions, lessons and tomorrow's priorities.
+
+organization_structure:
+  - chronological
+  - reflection_based
+  - sectioned
+  - daily_log
+  - metadata_header
+  - guided_reflection
+  - personal
+
+sections:
+  - Mood
+  - Highlights
+  - Challenges
+  - Gratitude
+  - Lessons Learned
+  - Tomorrow
+
+style:
+  - reflective
+  - personal
+
+preview_markdown: |
+  ---
+  date: 2026-07-01
+  mood: 😊
+  energy: High
+  ---
+
+  # Highlights
+
+  Finished Kaggle project.
+
+  # Challenges
+
+  Felt distracted after lunch.
+
+  # Gratitude
+
+  Family support.
+
+  # Lessons Learned
+
+  Small focused sessions work best.
+
+  # Tomorrow
+
+  - Update README
+  - Apply for jobs
+
+template_markdown: |
+  ---
+  date:
+  mood:
+  energy:
+  ---
+
+  # Highlights
+
+  # Challenges
+
+  # Gratitude
+
+  # Lessons Learned
+
+  # Tomorrow
