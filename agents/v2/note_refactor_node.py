@@ -7,7 +7,7 @@ from agents.v2.guardrails import pre_workflow_guardrail_callback, post_workflow_
 
 
 def _dbg(label: str, value=None):
-    print(f"\n[DBG] ──── {label} ────")
+    print(f"\n[DBG] ---- {label} ----")
     if value is not None:
         print(f"       {repr(value)[:300]}")
 
@@ -67,18 +67,13 @@ def prepare_refactor_prompt(ctx, node_input) -> types.Content:
 
     return types.Content(role="user", parts=[types.Part.from_text(text=combined_prompt)])
 
-def get_note_refactor_agent(provider: str) -> LlmAgent:
-    """Returns a NoteRefactor LlmAgent configured for the selected provider."""
-    if provider.lower() == "openai":
-        from google.adk.models.lite_llm import LiteLlm
-        model = LiteLlm(model="openai/gpt-4o-mini")
-    else:
-        model = "gemini-3.1-flash-lite"
-
-        
+def get_note_refactor_agent(provider: str = None) -> LlmAgent:
+    """Returns a NoteRefactor LlmAgent. BYOK model injection happens in the guardrail callback."""
+    from google.adk.agents import LlmAgent
+    from google.adk.models.lite_llm import LiteLlm
     return LlmAgent(
         name="note_refactor",
-        model=model,
+        model=LiteLlm(model="gemini/gemini-3.1-flash-lite"),
         instruction="You are a markdown formatting assistant. Follow the system instructions exactly.",
         output_key="refactored_markdown",
         before_model_callback=pre_workflow_guardrail_callback,

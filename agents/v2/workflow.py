@@ -14,7 +14,7 @@ from google.genai import types
 # ---------------------------------------------------------------------------
 def _dbg(label: str, value=None):
     """Prints a clearly delimited debug line."""
-    print(f"\n[DBG] ──── {label} ────")
+    print(f"\n[DBG] ---- {label} ----")
     if value is not None:
         print(f"       {repr(value)}")
 
@@ -107,6 +107,18 @@ def rag_search_node(ctx: Context, node_input) -> Event:
             profile = NoteProfile(**dict(node_input))
 
         _dbg("rag_search_node: NoteProfile built", profile.model_dump())
+
+        # --- Guardrail short-circuit ----------------------------------------
+        # pre_profiler_guardrail_callback fires before note_profiler's LLM call
+        # and returns a NoteProfile(blocked=True) when input is rejected.
+        # We detect that here and exit the workflow without running RAG or refactor.
+        if profile.blocked:
+            _dbg("rag_search_node: GUARDRAIL block detected — short-circuiting", profile.reason)
+            return Event(
+                output={"status": "blocked"},
+                state={"blocked_reason": profile.reason}
+            )
+        # --------------------------------------------------------------------
 
         text_to_embed = note_profile_to_embedding_text(profile)
         _dbg("rag_search_node: text_to_embed (first 200 chars)", text_to_embed[:200])

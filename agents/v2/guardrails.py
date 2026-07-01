@@ -2,17 +2,17 @@ from __future__ import annotations
 
 import re
 import asyncio
+import json
 from typing import TYPE_CHECKING
 from google.genai import types
 
 # ADK types are only resolved at type-check time (mypy/pyright).
 # At runtime they are imported lazily inside each callback so that importing
-# this module in test environments does NOT trigger the full google.adk
-# __init__ chain (which pulls in opentelemetry and may break on version mismatches).
 if TYPE_CHECKING:
     from google.adk.agents.callback_context import CallbackContext
     from google.adk.models.llm_request import LlmRequest
     from google.adk.models.llm_response import LlmResponse
+    from google.adk.models.lite_llm import LiteLlm
 
 MAX_INPUT_LENGTH = 5000
 
@@ -44,7 +44,10 @@ User text:
 
 
 def _make_guardrail_response(reason: str) -> LlmResponse:
-    """Builds a blocked LlmResponse with the GUARDRAIL sentinel prefix."""
+    """Builds a blocked LlmResponse with the GUARDRAIL sentinel prefix.
+    Used by pre_workflow_guardrail_callback (on note_refactor) and
+    post_workflow_guardrail_callback.
+    """
     from google.adk.models.llm_response import LlmResponse  # lazy import
     return LlmResponse(
         content=types.Content(
@@ -52,6 +55,45 @@ def _make_guardrail_response(reason: str) -> LlmResponse:
             parts=[types.Part.from_text(text=f"{GUARDRAIL_PREFIX} {reason}")]
         )
     )
+
+
+def _make_blocked_profile_response(reason: str) -> LlmResponse:
+    """Builds a blocked LlmResponse whose content is a valid NoteProfile JSON.
+
+    Used by pre_profiler_guardrail_callback (on note_profiler) where
+    output_schema=NoteProfile requires the response to be parseable as JSON.
+    Returns NoteProfile(blocked=True, reason=...) so ADK validation passes.
+    """
+    from google.adk.models.llm_response import LlmResponse  # lazy import
+    blocked_profile = {
+        "blocked": True,
+        "reason": reason,
+        "description": "",
+        "instructions": "",
+        "tags": [],
+        "purpose": [],
+        "sections": [],
+        "organization_structure": [],
+        "style": [],
+    }
+    return LlmResponse(
+        content=types.Content(
+            role="model",
+            parts=[types.Part.from_text(text=json.dumps(blocked_profile))]
+        )
+    )
+
+
+def _extract_text_from_request(llm_request) -> str:
+    """Extracts concatenated text from all content parts of an LlmRequest."""
+    text = ""
+    if getattr(llm_request, "contents", None):
+        for content in llm_request.contents:
+            if getattr(content, "parts", None):
+                for part in content.parts:
+                    if getattr(part, "text", None):
+                        text += part.text + "\n"
+    return text
 
 
 async def _check_injection_gemini(text: str, api_key: str) -> bool:
@@ -125,19 +167,60 @@ async def run_pre_workflow_checks(raw_text: str, provider: str, api_key: str) ->
     return None
 
 
+async def pre_profiler_guardrail_callback(
+    callback_context: CallbackContext, llm_request: LlmRequest
+) -> LlmResponse | None:
+    """Pre-profiler guardrail: before_model_callback on note_profiler.
+
+    Runs length + injection checks BEFORE the note_profiler LLM call.
+    On block: returns a valid NoteProfile JSON with blocked=True so that
+    output_schema=NoteProfile Pydantic validation passes without error.
+    The downstream rag_search_node reads profile.blocked and short-circuits.
+    On pass: returns None — ADK proceeds with the normal LLM call.
+
+    This is the callback that fires in BOTH the Streamlit and A2A paths
+    because it lives inside the ADK workflow, not in the runner wrapper.
+    """
+    request_text = _extract_text_from_request(llm_request)
+
+    # --- 1. Length Validation -----------------------------------------------
+    if len(request_text.strip()) > MAX_INPUT_LENGTH:
+        return _make_blocked_profile_response(
+            f"Input text exceeds the {MAX_INPUT_LENGTH} character limit. Please shorten your note."
+        )
+
+    # --- 2. Prompt Injection Detection via LLM ------------------------------
+    provider = (callback_context.state.get("provider") or "gemini").lower()
+    api_key = callback_context.state.get("api_key", "")
+
+    try:
+        if provider == "openai":
+            injected = await _check_injection_openai(request_text, api_key)
+        else:
+            injected = await _check_injection_gemini(request_text, api_key)
+
+        if injected:
+            return _make_blocked_profile_response(
+                "Potential prompt injection detected. Your request has been blocked for safety."
+            )
+    except Exception as e:
+        # Fail open: log and let the workflow proceed if the check itself errors.
+        print(f"[Guardrail] Prompt injection check failed ({provider}): {e}")
+
+    return None
+
+
 async def pre_workflow_guardrail_callback(
     callback_context: CallbackContext, llm_request: LlmRequest
 ) -> LlmResponse | None:
-    """Pre-workflow guardrail: length check + provider-aware prompt injection detection."""
+    """Legacy pre-model callback kept on note_refactor (plain GUARDRAIL: sentinel).
 
-    # --- Extract all text from the request contents -------------------------
-    request_text = ""
-    if getattr(llm_request, "contents", None):
-        for content in llm_request.contents:
-            if getattr(content, "parts", None):
-                for part in content.parts:
-                    if getattr(part, "text", None):
-                        request_text += part.text + "\n"
+    note_refactor has no output_schema, so returning a plain GUARDRAIL: text
+    does not cause a Pydantic ValidationError. This callback remains here
+    as a second line of defence on the refactor step (e.g. if the note_profiler
+    callback fails open on an injection check error).
+    """
+    request_text = _extract_text_from_request(llm_request)
 
     # --- 1. Length Validation -----------------------------------------------
     if len(request_text.strip()) > MAX_INPUT_LENGTH:
@@ -146,8 +229,6 @@ async def pre_workflow_guardrail_callback(
         )
 
     # --- 2. Prompt Injection Detection via LLM ------------------------------
-    # Read provider + api_key from state (seeded by runner before workflow starts).
-    # Fall back gracefully if state is not yet populated.
     provider = (callback_context.state.get("provider") or "gemini").lower()
     api_key = callback_context.state.get("api_key", "")
 
@@ -162,7 +243,6 @@ async def pre_workflow_guardrail_callback(
                 "Potential prompt injection detected. Your request has been blocked for safety."
             )
     except Exception as e:
-        # Fail open: log and let the workflow proceed if the check itself errors.
         print(f"[Guardrail] Prompt injection check failed ({provider}): {e}")
 
     return None

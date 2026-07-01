@@ -11,13 +11,20 @@ class UserRefactorRequest(BaseModel):
 
 class NoteProfile(BaseModel):
     """Semantic representation of the note, output by NoteProfiler."""
-    description: str = Field(..., description="A Semantic Description of the note for RAG retrieval of template") 
-    instructions: str = Field(..., description="Instructions on how to refactor note") 
-    tags: List[str] = Field(..., description="Semantic concepts and information types present in the note indicating topics, concepts, usage, etc.")
-    purpose: List[str] = Field(..., description="Why the note exists") 
-    sections: List[str] = Field(..., description="Semantic sections the note must contain") 
-    organization_structure: List[str] = Field(..., description="How information is organized")
-    style: List[str] = Field(..., description="How information is to be rewritten (tone, density, etc.)")
+    # --- Guardrail fields: set internally by pre_profiler_guardrail_callback ---
+    # The LLM never sets these; they are only written by the guardrail callback
+    # when a pre-flight check blocks the request. Both default to safe values so
+    # normal LLM output (which omits them) remains valid.
+    blocked: bool = Field(default=False, description="True if a pre-flight guardrail blocked this request. Set by callback, not by LLM.")
+    reason: str = Field(default="", description="Human-readable block reason when blocked=True. Empty otherwise.")
+    # --- Semantic profiling fields (unchanged) ---
+    description: str = Field(default="", description="A Semantic Description of the note for RAG retrieval of template") 
+    instructions: str = Field(default="", description="Instructions on how to refactor note") 
+    tags: List[str] = Field(default_factory=list, description="Semantic concepts and information types present in the note indicating topics, concepts, usage, etc.")
+    purpose: List[str] = Field(default_factory=list, description="Why the note exists") 
+    sections: List[str] = Field(default_factory=list, description="Semantic sections the note must contain") 
+    organization_structure: List[str] = Field(default_factory=list, description="How information is organized")
+    style: List[str] = Field(default_factory=list, description="How information is to be rewritten (tone, density, etc.)")
 
 class TemplateMatch(BaseModel):
     """A matched template from the Supabase RAG search."""

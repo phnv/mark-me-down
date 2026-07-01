@@ -6,7 +6,7 @@ from google.adk.runners import InMemoryRunner
 from google.genai import types
 from agents.v2.workflow import get_refactor_workflow
 from agents.v2.models import TemplateMatch
-from agents.v2.guardrails import GUARDRAIL_PREFIX, run_pre_workflow_checks
+from agents.v2.guardrails import GUARDRAIL_PREFIX
 
 # Workaround for Python Windows asyncio ProactorBasePipeTransport bug
 if sys.platform == 'win32':
@@ -51,18 +51,10 @@ async def _run_workflow_async(runner, request_dict: dict, provider: str, api_key
     session.state["api_key"] = api_key
     _dbg("_run_workflow_async: session.state pre-seeded", {"provider": provider, "api_key": bool(api_key)})
 
-    # -------------------------------------------------------------------
-    # Pre-workflow guardrails: length + injection check.
-    # Run BEFORE the ADK workflow starts so that a blocked response is
-    # never fed into an LlmAgent that has output_schema set (which would
-    # cause a Pydantic ValidationError trying to parse the GUARDRAIL text).
-    # -------------------------------------------------------------------
-    raw_text = request_dict.get("raw_text", "")
-    block_reason = await run_pre_workflow_checks(raw_text, provider, api_key)
-    if block_reason:
-        _dbg("_run_workflow_async: PRE-WORKFLOW GUARDRAIL triggered", block_reason)
-        return None, "GUARDRAIL", block_reason
-
+    # NOTE: Pre-workflow guardrails (length + injection check) now run internally
+    # as before_model_callback on note_profiler. The callback returns a valid
+    # NoteProfile(blocked=True) JSON, which rag_search_node detects and short-circuits.
+    # We read blocked_reason from state after run_async (see below).
 
     import json
     message_content = types.Content(
@@ -113,7 +105,14 @@ async def _run_workflow_async(runner, request_dict: dict, provider: str, api_key
     _dbg("_run_workflow_async: updated_session.state keys", list(dict(updated_session.state)))
     _dbg("_run_workflow_async: updated_session.state", repr(dict(updated_session.state))[:800])
 
-    # PRIMARY OUTPUT: read from state["refactored_markdown"] written by note_refactor
+    # --- Internal guardrail short-circuit detection -------------------------
+    # rag_search_node writes blocked_reason to state when note_profiler's
+    # pre_profiler_guardrail_callback returns a NoteProfile(blocked=True).
+    blocked_reason = updated_session.state.get("blocked_reason")
+    if blocked_reason:
+        _dbg("_run_workflow_async: INTERNAL GUARDRAIL triggered", blocked_reason)
+        return None, "GUARDRAIL", blocked_reason
+    # -----------------------------------------------------------------------
     # via output_key=. LlmAgent nodes do NOT emit their result via event.output —
     # they write to state. Capturing event.output would only get intermediate routing values.
     raw_refactored = updated_session.state.get("refactored_markdown")
